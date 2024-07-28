@@ -1,0 +1,152 @@
+import React, { Component } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  Platform,
+  TouchableOpacity,
+  ImageBackground,
+  Image,
+} from "react-native";
+import { RFValue } from "react-native-responsive-fontsize";
+import axios from "axios";
+
+export default class HomeScreen extends Component {
+  constructor() {
+    super();
+    this.state = {
+      data: [],
+    };
+  }
+
+  componentDidMount() {
+    this.getData();
+  }
+
+  getData = async () => {
+    const { url } = this.state;
+    axios
+      .get(url)
+      .then((response) => {
+        this.setState({
+          listData: response.data.data,
+        });
+      })
+      .catch((error) => {
+        Alert.alert(error.message);
+      });
+  };
+    /* Escribe el código para recuperar los datos de la API FLask.
+       Almacena los datos recuperados en el estado llamado 'data' */
+
+     
+  
+
+  renderItems = ({ item, index }) => {
+    var num = index % 4;
+
+    return (
+      <TouchableOpacity
+        style={[
+          { backgroundColor: this.selectColor(index), opacity: 0.7 },
+          styles.cardContainer,
+        ]}
+        onPress={() => {
+          this.props.navigation.navigate("Star", { name: item.name });
+        }}
+      >
+        <Image
+          source={
+            num == 0
+              ? require("../assets/star1.png")
+              : num == 1
+              ? require("../assets/star2.png")
+              : num == 2
+              ? require("../assets/star3.png")
+              : num == 3
+              ? require("../assets/star4.png")
+              : null
+          }
+          style={{ width: 50, height: 50 }}
+        />
+        <Text style={styles.cardTitle}>{item.name}</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  keyExtractor = (item, index) => index.toString();
+
+  /* Esta función selecciona un color para las cartas en la FlatList */
+  selectColor = (index) => {
+    var color = ["#fbffd5", "#ffefff", "#ede5ff", "#eafff4"];
+    var num = index % 4;
+    return color[num];
+  };
+
+  render() {
+    const { data } = this.state;
+    return (
+      <ImageBackground
+        source={require("../assets/bg_image.jpg")}
+        style={{ flex: 1 }}
+      >
+        <SafeAreaView
+          style={{
+            marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+          }}
+        />
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>Estrellas</Text>
+        </View>
+        {data.length > 0 ? (
+          <View style={styles.upperContainer}>
+            <FlatList
+              numColumns={3}
+              data={data}
+              renderItem={this.renderItems}
+              keyExtractor={this.keyExtractor}
+            />
+          </View>
+        ) : <Text style={styles.headerTitle}>Cargando...</Text>}
+      </ImageBackground>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+  },
+  headerContainer: {
+    flex: 0.1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: RFValue(28),
+    fontWeight: "bold",
+  },
+  upperContainer: {
+    flex: 0.9,
+    alignItems: "center",
+  },
+  cardTitle: {
+    fontSize: RFValue(12),
+    textAlign: "center",
+    color: "navy",
+  },
+  cardContainer: {
+    borderWidth: 0,
+    borderRadius: 20,
+    margin: RFValue(10),
+    width: RFValue(100),
+    height: RFValue(100),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
